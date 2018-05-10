@@ -1,0 +1,83 @@
+---
+title: "Final"
+author: "Xiaotai Chai"
+date: "5/9/2018"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("dslabs")
+#install.packages("devtools")
+#install_github("ropensci/plotly")
+#devtools::install_github("dgrtwo/gganimate")
+#install.packages('animation')
+#devtools::install_github("yihui/animation")
+
+library(ggplot2)
+library(animation)
+library(gganimate)
+library(devtools)
+library(tidyverse)
+library(dslabs)
+library(plotly)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, fig.show = "animate", out.width = 1000, out.height = 600)
+
+diseases <- us_contagious_diseases %>% filter(disease != "Polio")
+str(murders)
+```
+
+## How are overall disease trends changing over time? Are some diseases more of a threat today than others?
+*Tips: Plotly graphs are interactive. Click on legend entries to toggle traces, click-and-drag on the chart to zoom, double-click to autoscale, shift-and-drag to pan.*
+```{r message=FALSE, warning=FALSE}
+# add a per 10,000 people rate column, and removes Alaska and Hawaii since they only became states in the late 50s.
+diseases.rate <- diseases %>%
+  filter(!state%in%c("Hawaii","Alaska")) %>%
+  mutate(rate = (count / weeks_reporting) * 52 / (population / 10000))
+  
+p1 <- ggplot(aes(year, rate, color = disease), data= diseases.rate) +  
+  geom_point(size = 1, alpha= 0.5) +
+  geom_smooth(method = "loess") +
+  scale_y_continuous(limits = c(0,250)) +
+  labs(title = "Disease Trends Over Time", x = "Year",
+    y = "Disease Rate (per 10,000 people)", color = "Disease") + 
+  theme(legend.position = c(.95, .95),legend.justification = c("right", "top"),legend.box.just = "right",legend.margin = margin(6, 6, 6, 6))
+
+ggplotly(p1, width = 1000, height = 600)
+
+```
+From the plot, we can see that Measles was a serious and over spread disease before 1968 and less and less people got this disease starting 1970s. The trends for most diseases are decreasing. Only for Pertussis, it decreased a lot during 1960s but started to increase a little bit from 1970s and become a threat comparing to others. Adding facet_wrap to separate each disease makes the trend of each disease clearer.
+
+```{r message=FALSE, warning=FALSE}
+p2 <- ggplot(aes(year, rate, color = disease), data= diseases.rate) +  
+  geom_point(size = 1, alpha= 0.5) +
+  geom_smooth(method = "loess", color = "black") +
+  scale_y_continuous(limits = c(0,30)) +
+  facet_wrap(~ disease) +
+  labs(title = "Disease Trends Over Time", x = "Year",
+    y = "Disease Rate (per 10,000 people)", color = "Disease") + 
+  theme(legend.position = "none")
+
+ggplotly(p2, width = 1000, height = 600)
+```
+
+## Is there a geographic pattern to illnesses? After accounting for population, are some states or regions more at risk for certain diseases, or is the risk fairly constant in all locations?
+```{r}
+# include Alaska and Hawaii since we want the location information
+diseases.location <- diseases %>%
+  mutate(rate = (count / weeks_reporting) * 52 / (population / 10000))
+p3 <- ggplot(diseases.location, aes(state, rate, color = disease, frame = year)) +
+  geom_point(size = 3)+
+  scale_y_continuous(limits = c(0,170)) +
+  theme(axis.text = element_text(size = 14, angle=90),axis.title = element_text(size = rel(2)), plot.title = element_text(size = rel(2)), legend.text = element_text(size = 12), legend.title = element_text(size = rel(2)))+
+  labs(title = "Diseases on States", x = "State", y = "Disease Rate (per 10,000 people)", color = "Disease")
+
+gganimate(p3, ani.width=1000, ani.height=600)
+```
+
+## 
+```{r}
+head(murders)
+str(murders)
+
+```
+
