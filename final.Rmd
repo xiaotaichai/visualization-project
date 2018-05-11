@@ -86,22 +86,29 @@ ggplotly(p3, width = 1000, height = 600)
 ```
 
 ### Is there a geographic pattern to illnesses? After accounting for population, are some states or regions more at risk for certain diseases, or is the risk fairly constant in all locations?
-*The attached gif plot will show you the rate of diseases on each state for each year.*
+This plot shows the overall rate of diseases on each state.
 ```{r message=FALSE, warning=FALSE, fig.width=16,fig.height=10}
 # include Alaska and Hawaii since we want the location information
 diseases.location <- diseases %>%
   mutate(rate = (count / weeks_reporting) * 52 / (population / 10000))
+
 p4 <- ggplot(diseases.location, aes(state, rate, color = disease, frame = year)) +
+  geom_point(size = 2)+
+  scale_y_continuous(limits = c(0,170)) +
+  theme(axis.text = element_text(size = 16, angle=90),axis.title = element_text(size = rel(2)), plot.title = element_text(face = "bold",size = rel(2.5)), legend.text = element_text(size = 16), legend.title = element_text(size = rel(2)))+
+  labs(title = "Diseases on States", x = "State", y = "Disease Rate (per 10,000 people)", color = "Disease")
+
+p4
+```
+
+The attached gif plot will show you the rate of diseases on each state for each year.
+```{r}
+p5 <- ggplot(diseases.location, aes(state, rate, color = disease, frame = year)) +
   geom_point(size = 3)+
   scale_y_continuous(limits = c(0,170)) +
   theme(axis.text = element_text(size = 14, angle=90),axis.title = element_text(size = rel(2)), plot.title = element_text(size = rel(2)), legend.text = element_text(size = 12), legend.title = element_text(size = rel(2)))+
   labs(title = "Diseases on States", x = "State", y = "Disease Rate (per 10,000 people)", color = "Disease")
 
-p5 <- ggplot(diseases.location, aes(state, rate, color = disease, frame = year)) +
-  geom_point(size = 2)+
-  scale_y_continuous(limits = c(0,170)) +
-  theme(axis.text = element_text(size = 14, angle=90),axis.title = element_text(size = rel(2)), plot.title = element_text(face = "bold",size = rel(2.5)), legend.text = element_text(size = 12), legend.title = element_text(size = rel(2)))+
-  labs(title = "Diseases on States", x = "State", y = "Disease Rate (per 10,000 people)", color = "Disease")
-p5
-#gganimate(p4, "p4.gif")
+#gganimate(p5,"p5.gif",ani.width = 1000, ani.height = 600)
 ```
+See attached p5.gif to view the animated plot.
